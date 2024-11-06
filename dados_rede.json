@@ -1,0 +1,1 @@
+{"paradas": ["casa", "undb", "seap"], "conexoes": [["casa", "undb", 40.0], ["casa", "seap", 60.0], ["undb", "seap", 60.0]]}
