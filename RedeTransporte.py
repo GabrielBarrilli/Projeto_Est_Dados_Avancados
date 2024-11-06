@@ -7,7 +7,8 @@ from Conexao import Conexao
 
 class RedeTransporte:
     def __init__(self):
-        self.grafo = nx.Graph()
+        # Usando DiGraph para suportar conexões direcionadas
+        self.grafo = nx.DiGraph()
         self.carregar_dados()
 
     def adicionar_parada(self, parada):
@@ -15,8 +16,12 @@ class RedeTransporte:
         print(f"Parada '{parada.nome}' adicionada com sucesso.")
 
     def adicionar_conexao(self, conexao):
-        self.grafo.add_edge(conexao.origem, conexao.destino, weight=conexao.tempo)
-        print(f"Conexão entre '{conexao.origem}' e '{conexao.destino}' com tempo {conexao.tempo} adicionada com sucesso.")
+        # Verifica se a conexão já existe e só adiciona se não estiver presente
+        if not self.grafo.has_edge(conexao.origem, conexao.destino):
+            self.grafo.add_edge(conexao.origem, conexao.destino, weight=conexao.tempo)
+            print(f"Conexão de '{conexao.origem}' para '{conexao.destino}' com tempo {conexao.tempo} adicionada com sucesso.")
+        else:
+            print(f"Já existe uma conexão de '{conexao.origem}' para '{conexao.destino}'.")
 
     def calcular_rota_mais_curta(self, origem, destino):
         try:
@@ -29,7 +34,7 @@ class RedeTransporte:
     def exibir_rede(self):
         pos = nx.spring_layout(self.grafo)
         labels = nx.get_edge_attributes(self.grafo, 'weight')
-        nx.draw(self.grafo, pos, with_labels=True, node_size=700, node_color="lightblue")
+        nx.draw(self.grafo, pos, with_labels=True, node_size=700, node_color="lightblue", arrows=True)
         nx.draw_networkx_edge_labels(self.grafo, pos, edge_labels=labels)
         plt.show()
 
