@@ -1,13 +1,12 @@
-import networkx as nx
 import json
 import os
+
 import matplotlib.pyplot as plt
-from Parada import Parada
-from Conexao import Conexao
+import networkx as nx
+
 
 class RedeTransporte:
     def __init__(self):
-        # Usando DiGraph para suportar conexões direcionadas
         self.grafo = nx.DiGraph()
         self.carregar_dados()
 
@@ -16,10 +15,10 @@ class RedeTransporte:
         print(f"Parada '{parada.nome}' adicionada com sucesso.")
 
     def adicionar_conexao(self, conexao):
-        # Verifica se a conexão já existe e só adiciona se não estiver presente
         if not self.grafo.has_edge(conexao.origem, conexao.destino):
             self.grafo.add_edge(conexao.origem, conexao.destino, weight=conexao.tempo)
-            print(f"Conexão de '{conexao.origem}' para '{conexao.destino}' com tempo {conexao.tempo} adicionada com sucesso.")
+            print(
+                f"Conexão de '{conexao.origem}' para '{conexao.destino}' com tempo {conexao.tempo} adicionada com sucesso.")
         else:
             print(f"Já existe uma conexão de '{conexao.origem}' para '{conexao.destino}'.")
 
