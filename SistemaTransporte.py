@@ -1,52 +1,49 @@
-from RedeTransporte import RedeTransporte
-from Parada import Parada
-from Conexao import Conexao
+from datetime import datetime
+
+import googlemaps
+
+from Grafo import Grafo
 
 
 class SistemaTransporte:
-    def __init__(self):
-        self.rede = RedeTransporte()
+    def __init__(self, api_key=None):
+        self.grafo = Grafo()
+        self.api_key = api_key
+        self.gmaps = googlemaps.Client(key=self.api_key)
 
-    def limpar_console(self):
-        print("\n" * 50)
+    def adicionar_parada(self, nome, latitude, longitude):
+        self.grafo.adicionar_parada(nome, latitude, longitude)
 
-    def menu(self):
-        while True:
-            self.limpar_console()
-            print("\n--- Sistema de Transporte Público Inteligente ---")
-            print("1. Adicionar Parada")
-            print("2. Adicionar Conexão")
-            print("3. Calcular Rota Mais Curta")
-            print("4. Exibir Rede de Transporte")
-            print("5. Salvar Dados")
-            print("6. Sair")
+    def adicionar_conexao(self, origem, destino):
+        origem_coords = self.grafo.grafo.nodes[origem]
+        destino_coords = self.grafo.grafo.nodes[destino]
 
-            opcao = input("Escolha uma opção: ")
+        distancia = self.calcular_distancia_googlemaps(origem_coords['latitude'], origem_coords['longitude'],
+                                                       destino_coords['latitude'], destino_coords['longitude'])
 
-            if opcao == '1':
-                nome = input("Nome da parada: ")
-                parada = Parada(nome)
-                self.rede.adicionar_parada(parada)
-            elif opcao == '2':
-                origem = input("Parada de origem: ")
-                destino = input("Parada de destino: ")
-                tempo = float(input("Tempo de viagem: "))
-                conexao = Conexao(origem, destino, tempo)
-                self.rede.adicionar_conexao(conexao)
-            elif opcao == '3':
-                origem = input("Parada de origem: ")
-                destino = input("Parada de destino: ")
-                self.rede.calcular_rota_mais_curta(origem, destino)
-            elif opcao == '4':
-                print("Exibindo Rede de Transporte...")
-                self.rede.exibir_rede()
-            elif opcao == '5':
-                self.rede.salvar_dados()
-            elif opcao == '6':
-                print("Saindo do sistema.")
-                break
-            else:
-                print("Opção inválida.")
+        self.grafo.adicionar_conexao(origem, destino, distancia)
 
-            input("\nPressione qualquer tecla para continuar...")
-            self.limpar_console()
+    def calcular_distancia_googlemaps(self, lat1, lon1, lat2, lon2):
+        origem = (lat1, lon1)
+        destino = (lat2, lon2)
+        resultado = self.gmaps.distance_matrix(origem, destino, mode="driving", departure_time=datetime.now())
+
+        if resultado['status'] == 'OK':
+            distancia_metros = resultado['rows'][0]['elements'][0]['distance']['value']
+            distancia_km = distancia_metros / 1000  # Converte de metros para quilômetros
+            return distancia_km
+        else:
+            print(f"Erro ao calcular a distância entre {origem} e {destino}.")
+            return 0  # Retorna 0 caso não seja possível calcular a distância
+
+    def exibir_conexoes(self):
+        self.grafo.exibir_conexoes()
+
+    def salvar_dados(self, arquivo):
+        self.grafo.salvar_dados(arquivo)
+
+    def carregar_dados(self, arquivo):
+        self.grafo.carregar_dados(arquivo)
+
+    def gerar_grafo(self):
+        self.grafo.gerar_grafo()
